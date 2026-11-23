@@ -5,7 +5,7 @@ import sys
 import types
 
 PKG = "apsys"
-ROOT = pathlib.Path(__file__).parents[1] / "custom_components" / "apsystems_storage"
+ROOT = pathlib.Path(__file__).parents[1] / "custom_components" / "apsystems_storage_modbus"
 
 pkg = types.ModuleType(PKG)
 pkg.__path__ = [str(ROOT)]

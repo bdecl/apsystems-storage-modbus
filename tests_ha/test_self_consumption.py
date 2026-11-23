@@ -177,5 +177,5 @@ async def test_missing_grid_meter_stops_battery(ctrl):
         "automation", "trigger", {"entity_id": AUTOMATION, "skip_condition": True},
         blocking=True)
     await hass.async_block_till_done()
-    await hass.config_entries.async_entries("apsystems_storage")[0].runtime_data.async_refresh()
+    await hass.config_entries.async_entries("apsystems_storage_modbus")[0].runtime_data.async_refresh()
     assert float(hass.states.get("number.elt_12_0999_power_setpoint").state) == 0
