@@ -1,18 +1,18 @@
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="custom_components/apsystems_storage/brand/dark_logo@2x.png">
-    <img alt="APS ELT / ELS — storage, local Modbus TCP" src="custom_components/apsystems_storage/brand/logo@2x.png" width="480">
+    <source media="(prefers-color-scheme: dark)" srcset="custom_components/apsystems_storage_modbus/brand/dark_logo@2x.png">
+    <img alt="APS ELT / ELS — storage, local Modbus TCP" src="custom_components/apsystems_storage_modbus/brand/logo@2x.png" width="480">
   </picture>
 </p>
 
 # APsystems ELT-12K / ELS – Home Assistant Modbus
 
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://hacs.xyz/docs/faq/custom_repositories)
-[![GitHub release](https://img.shields.io/github/v/release/bdecl/aps-elt12k-homeassistant-modbus)](https://github.com/bdecl/aps-elt12k-homeassistant-modbus/releases)
-[![Validate](https://github.com/bdecl/aps-elt12k-homeassistant-modbus/actions/workflows/validate.yml/badge.svg)](https://github.com/bdecl/aps-elt12k-homeassistant-modbus/actions/workflows/validate.yml)
+[![GitHub release](https://img.shields.io/github/v/release/bdecl/apsystems-storage-modbus)](https://github.com/bdecl/apsystems-storage-modbus/releases)
+[![Validate](https://github.com/bdecl/apsystems-storage-modbus/actions/workflows/validate.yml/badge.svg)](https://github.com/bdecl/apsystems-storage-modbus/actions/workflows/validate.yml)
 [![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2026.10%2B-blue.svg)](https://www.home-assistant.io/)
-[![Installs](https://img.shields.io/badge/dynamic/json?color=41BDF5&logo=home-assistant&label=installs&cacheSeconds=15600&url=https://analytics.home-assistant.io/custom_integrations.json&query=$.apsystems_storage.total)](https://analytics.home-assistant.io/)
-[![License](https://img.shields.io/github/license/bdecl/aps-elt12k-homeassistant-modbus)](LICENSE)
+[![Installs](https://img.shields.io/badge/dynamic/json?color=41BDF5&logo=home-assistant&label=installs&cacheSeconds=15600&url=https://analytics.home-assistant.io/custom_integrations.json&query=$.apsystems_storage_modbus.total)](https://analytics.home-assistant.io/)
+[![License](https://img.shields.io/github/license/bdecl/apsystems-storage-modbus)](LICENSE)
 
 This repository connects the **APsystems ELT-12K** energy storage system
 (and, experimentally, the **ELS-5K / ELS-11.4**, which share the same Modbus
@@ -20,7 +20,7 @@ protocol) to **Home Assistant** over Modbus TCP.
 
 Two ways to use it:
 
-- **Option A – custom integration** (`custom_components/apsystems_storage`),
+- **Option A – custom integration** (`custom_components/apsystems_storage_modbus`),
   installable with HACS, configured from the UI. Recommended.
 - **Option B – YAML configuration** for the native Home Assistant Modbus
   integration (`modbus/`), as before.
@@ -34,15 +34,36 @@ Two ways to use it:
    fixed address. Modbus is not served over Wi-Fi.
 2. **Install** through HACS, then restart Home Assistant (2026.10 or newer).
 
-   [![Open in HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=bdecl&repository=aps-elt12k-homeassistant-modbus&category=integration)
+   [![Open in HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=bdecl&repository=apsystems-storage-modbus&category=integration)
 3. **Remove any `modbus:` hub** declared in YAML for the ELT, and restart: the
    ELT answers a single Modbus client.
 4. **Add the integration**: IP of the wired interface, port `502`, unit ID `1`,
    then confirm the number of phases.
 
-   [![Add integration](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=apsystems_storage)
+   [![Add integration](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=apsystems_storage_modbus)
 5. **Optional:** the [self-consumption package](#self-consumption-controller-example-package)
    to drive the battery from a grid meter, and the [example dashboard](#example-dashboard).
+
+## Upgrading from 0.3.x or earlier
+
+Version 0.4.0 renames the integration from `apsystems_storage` to
+`apsystems_storage_modbus`, and the repository from
+`aps-elt12k-homeassistant-modbus` to `apsystems-storage-modbus`. The old domain
+is also used by an unrelated integration for the APsystems LAKE storage
+(HTTP), and two integrations cannot share a domain in Home Assistant.
+
+Home Assistant sees the new name as a new integration:
+
+1. Note the options of the current entry (groups, update intervals,
+   keepalive), and the entity IDs your automations and dashboards use.
+2. Set the power setpoint to 0 W.
+3. Delete the **APsystems Storage (ELT / ELS) Modbus** entry, then remove the
+   folder `custom_components/apsystems_storage` and restart Home Assistant.
+4. Install 0.4.0 through HACS (the old repository address redirects to the new
+   one), restart, and add the integration again.
+5. Rename the new entities to the entity IDs you noted: automations,
+   dashboards and long-term statistics keep working, because they follow the
+   entity ID.
 
 ## How it fits together
 

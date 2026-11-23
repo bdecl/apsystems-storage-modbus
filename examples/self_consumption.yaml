@@ -7,7 +7,7 @@
 # Assistant: it charges the battery with what would otherwise be exported,
 # and discharges it to cover what would otherwise be imported.
 #
-# Requires the apsystems_storage integration from this repository.
+# Requires the apsystems_storage_modbus integration from this repository.
 # Install as a package (see README), then edit section 1 below.
 #
 # Safety
@@ -75,7 +75,7 @@ automation:
     alias: "ELT - Self-consumption controller"
     description: >
       Self-consumption control of an APsystems ELT/ELS battery through the
-      apsystems_storage integration. Modes: Off, Self-consumption, Manual.
+      apsystems_storage_modbus integration. Modes: Off, Self-consumption, Manual.
     mode: single
     max_exceeded: silent
     trace:

@@ -11,7 +11,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 from homeassistant.helpers import entity_registry as er
 
-from custom_components.apsystems_storage.const import DOMAIN
+from custom_components.apsystems_storage_modbus.const import DOMAIN
 
 BASE = 40000
 

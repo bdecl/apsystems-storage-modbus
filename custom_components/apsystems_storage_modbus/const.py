@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from homeassistant.const import Platform
 
-DOMAIN = "apsystems_storage"
+DOMAIN = "apsystems_storage_modbus"
 MANUFACTURER = "APsystems"
 
 CONF_UNIT = "unit_id"
