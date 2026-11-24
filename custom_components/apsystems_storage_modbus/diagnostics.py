@@ -8,6 +8,7 @@ from homeassistant.const import CONF_HOST
 from homeassistant.core import HomeAssistant
 
 from . import StorageConfigEntry
+from .registers import detect_model
 
 REDACT = {CONF_HOST, "serial", "unique_id"}
 
@@ -17,8 +18,17 @@ async def async_get_config_entry_diagnostics(
 ) -> dict[str, Any]:
     c = entry.runtime_data
     data = dict(c.data or {})
+    serial = data.get("serial") or ""
+    model, phases = detect_model(serial, data.get("model"))
     return {
         "entry": async_redact_data({**entry.as_dict()}, REDACT),
+        # The serial stays redacted; its first 4 characters tell the model.
+        "model_detection": {
+            "model_register": data.get("model"),
+            "serial_prefix": serial[:4],
+            "detected_model": model,
+            "default_phases": phases,
+        },
         "fragmented_blocks": c.hub.fragmented,
         "experimental_block_readable": c.detail_ok,
         "scale_factors_reported": {k: v for k, v in data.items() if k.startswith("sf_")},

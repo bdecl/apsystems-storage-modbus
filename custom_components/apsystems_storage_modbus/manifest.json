@@ -11,5 +11,5 @@
   "issue_tracker": "https://github.com/bdecl/apsystems-storage-modbus/issues",
   "loggers": ["custom_components.apsystems_storage_modbus", "modbus_connection", "tmodbus"],
   "requirements": [],
-  "version": "0.4.0"
+  "version": "0.4.1"
 }

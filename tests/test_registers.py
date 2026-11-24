@@ -59,6 +59,21 @@ def test_bits_and_model():
     assert detect_model("X1", "Model") == ("APsystems storage", 1)
 
 
+def test_detect_new_models_from_model_register():
+    # a model register naming a known model wins over the serial prefix
+    assert detect_model("B05000000001", "ELT-10") == ("ELT-10", 3)
+    assert detect_model("X1", "ELT-6") == ("ELT-6", 3)
+    assert detect_model("X1", "APsystems ELT 8") == ("ELT-8", 3)
+    assert detect_model("X1", "ELT-12K") == ("ELT-12", 3)
+    # split-phase and single-phase units
+    assert detect_model("X1", "ELT-11K") == ("ELT-11K", 1)
+    assert detect_model("X1", "ELS-11.4") == ("ELS-11.4", 1)
+    assert detect_model("X1", "ELS-5K") == ("ELS-5K", 1)
+    assert detect_model("X1", "ELT-5K") == ("ELS-5K", 1)
+    # entry title uses the detected model
+    assert entry_title("X10000000042", "ELT-8") == "ELT-8 (0042)"
+
+
 def test_entry_title_from_serial_prefix():
     # The ELT-12 answers "Model" in 40020: the serial prefix decides.
     assert entry_title("B05000001234", "Model") == "ELT-12 (1234)"
