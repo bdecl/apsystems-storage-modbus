@@ -70,6 +70,16 @@ def test_detect_new_models_from_model_register():
     assert detect_model("X1", "ELS-11.4") == ("ELS-11.4", 1)
     assert detect_model("X1", "ELS-5K") == ("ELS-5K", 1)
     assert detect_model("X1", "ELT-5K") == ("ELS-5K", 1)
+    assert detect_model("X1", "LSA-6") == ("LSA-6", 1)
+
+
+def test_detect_serial_prefixes_rev11():
+    # Modbus Protocol Rev1.1: B0501 / B0502 are single-phase, not ELT-12
+    assert detect_model("B05010000001", None) == ("LSA-6", 1)
+    assert detect_model("B05020000001", "Model") == ("LSH-6", 1)
+    assert detect_model("B05000000001", "Model") == ("ELT-12", 3)
+    assert detect_model("B04000000001", None) == ("ELS-11.4", 1)
+    assert entry_title("B05010001234", None) == "LSA-6 (1234)"
     # entry title uses the detected model
     assert entry_title("X10000000042", "ELT-8") == "ELT-8 (0042)"
 

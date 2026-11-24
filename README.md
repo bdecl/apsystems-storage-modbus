@@ -17,8 +17,8 @@
 This repository connects the **APsystems ELT-12K** energy storage system to
 **Home Assistant** over Modbus TCP. The other APstorage PCS (the three-phase
 **ELT-6 / ELT-8 / ELT-10**, the split-phase **ELT-11K / ELS-11.4** and the
-single-phase **ELS-5K**) share the same Modbus protocol and are supported
-experimentally.
+single-phase **ELS-5K**, **LSA-6** and **LSH-6**) share the same Modbus protocol
+and are supported experimentally.
 
 Two ways to use it:
 
@@ -34,7 +34,8 @@ Two ways to use it:
 ## Quick start
 
 1. **On the ELT**, enable Modbus TCP and give the **wired** Ethernet interface a
-   fixed address. Modbus is not served over Wi-Fi.
+   fixed address. Modbus is not served over Wi-Fi. See
+   [Enabling Modbus](#enabling-modbus).
 2. **Install**: search for **APsystems Storage (ELT / ELS) Modbus** in the
    Marketplace (*HACS* on Home Assistant before 2026.11), install it, then
    restart Home Assistant (2026.10 or newer).
@@ -89,14 +90,16 @@ keeps the last word on charge and discharge limits, over CAN.
 | **ELT-6 / ELT-8 / ELT-10** (three-phase, 6 / 8 / 10 kVA) | ⚠️ Experimental, untested | Same family and protocol as the ELT-12. Reports welcome |
 | **ELT-11K / ELS-11.4** (split-phase, North America) | ⚠️ Experimental, untested | Same Modbus protocol; L1 and totals only. Reports welcome |
 | **ELS-5K** (single-phase, also sold as ELT-5K) | ⚠️ Experimental, untested | Same Modbus protocol; L1 and totals only. Reports welcome |
+| **LSA-6 / LSH-6** (single-phase, AC-coupled / hybrid) | ⚠️ Experimental, untested | Listed in the Modbus Protocol Rev1.1; L1 and totals only. Reports welcome |
 | Wired Ethernet, Modbus TCP | ✅ Required | Port 502 |
 | Wi-Fi interface | ❌ No Modbus | Cloud and EMA only |
 | RS485 / RS232 serial | ❌ Not supported | TCP only for now |
 | Home Assistant | 2026.10 or newer | For the integration (shared Modbus connection) |
 
 The model is read from the device's model register when it names one, and
-otherwise from the serial number prefix (`B050` ELT-12, `B040` ELS-11.4, `215`
-ELS-5K). A model the integration does not recognise still works: confirm the
+otherwise from the serial number prefix listed in the Modbus Protocol Rev1.1
+(`B0500` ELT-12, `B0501` LSA-6, `B0502` LSH-6, `B0400` ELS-11.4, `215`
+ELS-5K). The ELT-6 / 8 / 10 are not in that table yet. A model the integration does not recognise still works: confirm the
 number of phases when adding it.
 
 If you run it on anything other than an ELT-12, an issue with the
@@ -139,6 +142,18 @@ does not answer.
 
 Give that interface a fixed address (DHCP reservation or static IP) so the
 `host:` in the hub definition keeps working after a reboot.
+
+### Enabling Modbus
+
+Modbus is switched on from the installer tools (Modbus Protocol Rev1.1):
+
+- **EMA Manager** (app): *Third-party platform – Modbus* → on, *Communication*
+  `TCP`, *Slave address* `1`.
+- **EMA web**: *APEMS Remote Control* → *Third-party control* → *Enable Modbus*,
+  *Comm Mode* `TCP`, *Communication Address* `1`.
+
+The same screens offer RS485 (9600 baud) and, on the ELS-5K, RS232. This
+integration only uses TCP.
 
 !! When modbus enabled, the internal modes will not work any more. Charge, discharge has to be controlled with the battery set power modbus parameter.
 
@@ -183,8 +198,8 @@ Step by step:
 | Number | **Power setpoint** (register 40183, W, `< 0` charge, `> 0` discharge, `0` standby), **SoC reserve min / max** |
 
 L2/L3 entities are only created for three-phase units (ELT-6 to ELT-12).
-Single-phase and split-phase units (ELS-5K, ELT-11K / ELS-11.4) get L1 and the
-totals.
+Single-phase and split-phase units (ELS-5K, LSA-6, LSH-6, ELT-11K / ELS-11.4)
+get L1 and the totals.
 
 #### Entity groups
 
