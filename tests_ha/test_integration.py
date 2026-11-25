@@ -297,3 +297,18 @@ async def test_update_every_throttles_state_writes(hass: HomeAssistant, elt):
     await hass.async_block_till_done()
     assert hass.states.get(volt).state == "52.0"  # 0 = every poll
     assert entry.options["update_every_energy"] == 60  # untouched default kept
+
+
+async def test_diagnostics_hide_identifiers(hass: HomeAssistant, elt):
+    from custom_components.apsystems_storage_modbus.diagnostics import (
+        async_get_config_entry_diagnostics,
+    )
+    port, _ = elt
+    entry = await _setup(hass, port, "3")
+    diag = await async_get_config_entry_diagnostics(hass, entry)
+    text = str(diag)
+    assert "B05000000999" not in text
+    assert "0999" not in text  # the entry title ends with the last 4 digits
+    assert "127.0.0.1" not in text
+    assert diag["model_detection"]["serial_prefix"] == "B050"
+    assert diag["model_detection"]["detected_model"] == "ELT-12"

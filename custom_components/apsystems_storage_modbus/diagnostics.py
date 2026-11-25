@@ -10,7 +10,8 @@ from homeassistant.core import HomeAssistant
 from . import StorageConfigEntry
 from .registers import detect_model
 
-REDACT = {CONF_HOST, "serial", "unique_id"}
+# The entry title ends with the last 4 digits of the serial: hidden too.
+REDACT = {CONF_HOST, "serial", "unique_id", "title"}
 
 
 async def async_get_config_entry_diagnostics(
