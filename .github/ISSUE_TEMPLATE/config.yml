@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: README, compatibility and FAQ
+    url: https://github.com/bdecl/apsystems-storage-modbus#readme
+    about: Setup (wired interface only, one Modbus client at a time), supported models and the known ELT behaviour.

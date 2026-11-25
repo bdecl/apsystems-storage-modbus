@@ -1,0 +1,64 @@
+name: Problem report
+description: Something does not work as expected with the integration or the YAML configuration.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report. The diagnostics file is what makes a problem solvable:
+        *Settings → Devices & services → APsystems Storage (ELT / ELS) Modbus → ⋮ → Download diagnostics*.
+        It hides the serial number (only its first 4 characters, which tell the model, stay visible)
+        and the IP address.
+
+        **Never post a full serial number in an issue.**
+  - type: input
+    id: device
+    attributes:
+      label: Device model and firmware
+      description: Model, and the chip versions shown by the integration or in EMA.
+      placeholder: ELT-12, chips 1.1.9.4 / 1.1.6.2 / 1.1.0.14
+    validations:
+      required: true
+  - type: dropdown
+    id: option
+    attributes:
+      label: Which option do you use?
+      options:
+        - Option A – Home Assistant integration
+        - Option B – YAML configuration
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Home Assistant and integration versions
+      placeholder: Home Assistant 2026.11.2, integration 0.4.1
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happens, and what you expected
+      description: Which entity or value is wrong, since when, and what EMA shows at the same moment.
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostics
+      description: Drag the diagnostics file here (Option A). For Option B, the YAML you use, with the IP address removed.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Log lines (optional)
+      description: Lines mentioning `apsystems_storage_modbus` or `modbus` from *Settings → System → Logs*.
+      render: text
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy
+      options:
+        - label: I checked that this report contains no full serial number or public IP address.
+          required: true

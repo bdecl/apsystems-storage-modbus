@@ -99,11 +99,13 @@ keeps the last word on charge and discharge limits, over CAN.
 The model is read from the device's model register when it names one, and
 otherwise from the serial number prefix listed in the Modbus Protocol Rev1.1
 (`B0500` ELT-12, `B0501` LSA-6, `B0502` LSH-6, `B0400` ELS-11.4, `215`
-ELS-5K). The ELT-6 / 8 / 10 are not in that table yet. A model the integration does not recognise still works: confirm the
-number of phases when adding it.
+ELS-5K). The ELT-6 / 8 / 10 are not in that table yet. A model the
+integration does not recognise still works: confirm the number of phases when
+adding it.
 
-If you run it on anything other than an ELT-12, an issue with the
-integration's diagnostics attached (*Download diagnostics*) is very welcome:
+If you run it on anything other than an ELT-12, a
+[hardware report](https://github.com/bdecl/apsystems-storage-modbus/issues/new?template=hardware_report.yml)
+with the integration's diagnostics attached (*Download diagnostics*) is very welcome:
 it shows the model string, the serial prefix and the scale factors the device
 reports.
 
@@ -405,6 +407,13 @@ attach them to any issue, especially for models other than the ELT-12.
 ---
 
 ## FAQ and troubleshooting
+
+To report a problem, use the
+[problem report](https://github.com/bdecl/apsystems-storage-modbus/issues/new?template=bug_report.yml)
+form and attach the diagnostics (*Settings → Devices & services → APsystems
+Storage (ELT / ELS) Modbus → ⋮ → Download diagnostics*). The serial number
+(apart from its first 4 characters, which tell the model) and the IP address
+are hidden in it.
 
 <details>
 <summary><b>Setup says there is no answer</b></summary>

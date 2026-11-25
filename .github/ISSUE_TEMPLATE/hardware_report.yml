@@ -1,0 +1,56 @@
+name: Hardware report
+description: Tell whether the integration works on a model not marked as tested (ELT-6/8/10, ELT-11K, ELS, LSA, LSH).
+labels: [hardware report]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Reports on models marked ⚠️ in the README are very welcome, also when everything works.
+        Attach the diagnostics (*Settings → Devices & services → APsystems Storage (ELT / ELS) Modbus →
+        ⋮ → Download diagnostics*). Its `model_detection` part shows the model string, the first
+        4 characters of the serial and the phases the integration chose; the serial itself stays hidden.
+  - type: input
+    id: device
+    attributes:
+      label: Device model and firmware
+      placeholder: ELT-10, chips x.x.x.x / x.x.x.x / x.x.x.x
+    validations:
+      required: true
+  - type: dropdown
+    id: result
+    attributes:
+      label: Result
+      options:
+        - Everything works
+        - Works, but some values are wrong or missing
+        - Setup fails
+    validations:
+      required: true
+  - type: dropdown
+    id: model_ok
+    attributes:
+      label: Is the model name shown by the integration correct?
+      options:
+        - "Yes"
+        - "No"
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: Which values are wrong or missing compared with EMA. Does writing a power setpoint work?
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostics
+      description: Drag the file here.
+    validations:
+      required: true
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy
+      options:
+        - label: I checked that this report contains no full serial number or public IP address.
+          required: true
