@@ -1,7 +1,8 @@
-"""Register map of the APsystems PCS Modbus protocol (ELT-12 / ELS-5K / ELS-11.4).
+"""Register map of the APsystems storage Modbus protocol (ELT / ELS / LSA / LSH).
 
-Source: "Modbus protocol for PCS" REV1.0 (SunSpec common model 1 + storage
-model 802 layout). Scales are the ones validated on a live ELT-12K, which
+Source: "Modbus protocol for PCS" REV1.0 and "Modbus Protocol" Rev1.1
+(2026-10-27), same point table (SunSpec common model 1 + storage model 802
+layout). Scales are the ones validated on a live ELT-12K, which
 differ from the PDF for WHRtg (the device returns kWh directly).
 
 This module has no Home Assistant dependency so it can be unit-tested alone.
@@ -10,6 +11,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import math
+import re
 import struct
 from typing import Any
 
@@ -261,26 +263,66 @@ def active_bits(value: int | None, names: dict[int, str]) -> list[str]:
 
 GENERIC_MODELS = {"model", "unknown", "n/a", "none", "-"}
 
+# Phase count of every known model. The whole family speaks the same storage
+# Modbus protocol; only the ELT-12 has been tested on a live unit.
+MODEL_PHASES: dict[str, int] = {
+    "ELT-6": 3,
+    "ELT-8": 3,
+    "ELT-10": 3,
+    "ELT-12": 3,
+    "ELT-11K": 1,  # split-phase (North America), formerly sold as ELS-11.4
+    "ELS-11.4": 1,
+    "ELS-5K": 1,
+    "LSA-6": 1,
+    "LSH-6": 1,
+}
+
+# Serial prefix -> model, from the "Check support" table of the Modbus
+# Protocol Rev1.1 (2026-10-27). Longest prefixes first: B0501 / B0502 must not
+# be taken for an ELT-12 (B0500). The ELT-6/8/10 are not in that table yet:
+# their model register names them, or the user confirms the phases.
+SERIAL_PREFIXES: tuple[tuple[str, str], ...] = (
+    ("B0500", "ELT-12"),
+    ("B0501", "LSA-6"),
+    ("B0502", "LSH-6"),
+    ("B0400", "ELS-11.4"),
+    # Older or unlisted serials of the same families
+    ("B050", "ELT-12"),
+    ("B040", "ELS-11.4"),
+    ("215", "ELS-5K"),
+)
+
+_MODEL_RE = re.compile(r"\b(EL[ST]|LS[AH])\s*-?\s*(\d+(?:\.\d+)?)\s*K?\b", re.IGNORECASE)
+
+
+def _model_from_text(text: str) -> str | None:
+    """Canonical model name from a model string such as "ELT-10", "ELS 5K" or "LSA-6"."""
+    match = _MODEL_RE.search(text)
+    if match is None:
+        return None
+    family, size = match.group(1).upper(), match.group(2)
+    if family in ("ELS", "ELT") and size == "5":
+        return "ELS-5K"  # APsystems names the 5 kW unit both ways
+    if family in ("ELS", "ELT") and size.startswith("11"):
+        return "ELT-11K" if family == "ELT" else "ELS-11.4"
+    return f"{family}-{size}"
+
 
 def detect_model(serial: str | None, model: str | None) -> tuple[str, int]:
     """Return (model name, default phase count).
 
-    The serial prefix is authoritative: the ELT-12 answers the generic text
-    "Model" in the SunSpec model register (40020), so that string is only used
-    for serials we do not recognise, and never when it is a placeholder.
+    A model register that names a known model wins. The ELT-12 answers the
+    generic text "Model" in the SunSpec model register (40020), so the serial
+    prefix decides next; any other non-placeholder model string comes last.
     """
     model = (model or "").strip()
-    if serial and serial.startswith("B050"):
-        name = "ELT-12"
-    elif serial and serial.startswith("B040"):
-        name = "ELS-11.4"
-    elif serial and serial.startswith("215"):
-        name = "ELS-5K"
-    elif model and model.lower() not in GENERIC_MODELS:
-        name = model
-    else:
-        name = "APsystems storage"
-    phases = 3 if "ELT" in name.upper() else 1
+    name = _model_from_text(model) if model else None
+    if name is None and serial:
+        name = next((n for prefix, n in SERIAL_PREFIXES if serial.startswith(prefix)), None)
+    if name is None:
+        name = model if model and model.lower() not in GENERIC_MODELS else "APsystems storage"
+    # Unknown model: ELT = three-phase; ELS, LSA, LSH = single-phase ("S" for single)
+    phases = MODEL_PHASES.get(name, 3 if name.upper().startswith("ELT") else 1)
     return name, phases
 
 

@@ -5,23 +5,26 @@
   </picture>
 </p>
 
-# APsystems ELT-12K / ELS – Home Assistant Modbus
+# APsystems ELT / ELS – Home Assistant Modbus
 
-[![HACS Custom](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://hacs.xyz/docs/faq/custom_repositories)
+[![HACS Default](https://img.shields.io/badge/HACS-Default-41BDF5.svg)](https://hacs.xyz/)
 [![GitHub release](https://img.shields.io/github/v/release/bdecl/apsystems-storage-modbus)](https://github.com/bdecl/apsystems-storage-modbus/releases)
 [![Validate](https://github.com/bdecl/apsystems-storage-modbus/actions/workflows/validate.yml/badge.svg)](https://github.com/bdecl/apsystems-storage-modbus/actions/workflows/validate.yml)
 [![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2026.10%2B-blue.svg)](https://www.home-assistant.io/)
 [![Installs](https://img.shields.io/badge/dynamic/json?color=41BDF5&logo=home-assistant&label=installs&cacheSeconds=15600&url=https://analytics.home-assistant.io/custom_integrations.json&query=$.apsystems_storage_modbus.total)](https://analytics.home-assistant.io/)
 [![License](https://img.shields.io/github/license/bdecl/apsystems-storage-modbus)](LICENSE)
 
-This repository connects the **APsystems ELT-12K** energy storage system
-(and, experimentally, the **ELS-5K / ELS-11.4**, which share the same Modbus
-protocol) to **Home Assistant** over Modbus TCP.
+This repository connects the **APsystems ELT-12K** energy storage system to
+**Home Assistant** over Modbus TCP. The other APstorage PCS (the three-phase
+**ELT-6 / ELT-8 / ELT-10**, the split-phase **ELT-11K / ELS-11.4** and the
+single-phase **ELS-5K**, **LSA-6** and **LSH-6**) share the same Modbus protocol
+and are supported experimentally.
 
 Two ways to use it:
 
 - **Option A – custom integration** (`custom_components/apsystems_storage_modbus`),
-  installable with HACS, configured from the UI. Recommended.
+  in the default list of the Marketplace (HACS), configured from the UI.
+  Recommended.
 - **Option B – YAML configuration** for the native Home Assistant Modbus
   integration (`modbus/`), as before.
 
@@ -31,8 +34,11 @@ Two ways to use it:
 ## Quick start
 
 1. **On the ELT**, enable Modbus TCP and give the **wired** Ethernet interface a
-   fixed address. Modbus is not served over Wi-Fi.
-2. **Install** through HACS, then restart Home Assistant (2026.10 or newer).
+   fixed address. Modbus is not served over Wi-Fi. See
+   [Enabling Modbus](#enabling-modbus).
+2. **Install**: search for **APsystems Storage (ELT / ELS) Modbus** in the
+   Marketplace (*HACS* on Home Assistant before 2026.11), install it, then
+   restart Home Assistant (2026.10 or newer).
 
    [![Open in HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=bdecl&repository=apsystems-storage-modbus&category=integration)
 3. **Remove any `modbus:` hub** declared in YAML for the ELT, and restart: the
@@ -59,7 +65,7 @@ Home Assistant sees the new name as a new integration:
 2. Set the power setpoint to 0 W.
 3. Delete the **APsystems Storage (ELT / ELS) Modbus** entry, then remove the
    folder `custom_components/apsystems_storage` and restart Home Assistant.
-4. Install 0.4.0 through HACS (the old repository address redirects to the new
+4. Install 0.4.0 through the Marketplace / HACS (the old repository address redirects to the new
    one), restart, and add the integration again.
 5. Rename the new entities to the entity IDs you noted: automations,
    dashboards and long-term statistics keep working, because they follow the
@@ -80,15 +86,25 @@ keeps the last word on charge and discharge limits, over CAN.
 
 | | Status | Notes |
 |---|---|---|
-| **ELT-12K** (three-phase) | ✅ Tested | Option A and Option B |
-| **ELS-5K / ELS-11.4** (single-phase) | ⚠️ Experimental, untested | Same Modbus protocol; L1 and totals only. Reports welcome |
+| **ELT-12K** (three-phase, 12 kVA) | ✅ Tested | Option A and Option B |
+| **ELT-6 / ELT-8 / ELT-10** (three-phase, 6 / 8 / 10 kVA) | ⚠️ Experimental, untested | Same family and protocol as the ELT-12. Reports welcome |
+| **ELT-11K / ELS-11.4** (split-phase, North America) | ⚠️ Experimental, untested | Same Modbus protocol; L1 and totals only. Reports welcome |
+| **ELS-5K** (single-phase, also sold as ELT-5K) | ⚠️ Experimental, untested | Same Modbus protocol; L1 and totals only. Reports welcome |
+| **LSA-6 / LSH-6** (single-phase, AC-coupled / hybrid) | ⚠️ Experimental, untested | Listed in the Modbus Protocol Rev1.1; L1 and totals only. Reports welcome |
 | Wired Ethernet, Modbus TCP | ✅ Required | Port 502 |
 | Wi-Fi interface | ❌ No Modbus | Cloud and EMA only |
 | RS485 / RS232 serial | ❌ Not supported | TCP only for now |
 | Home Assistant | 2026.10 or newer | For the integration (shared Modbus connection) |
 
-If you run it on an ELS, an issue with the integration's diagnostics attached
-(*Download diagnostics*) is very welcome: it lists the scale factors the device
+The model is read from the device's model register when it names one, and
+otherwise from the serial number prefix listed in the Modbus Protocol Rev1.1
+(`B0500` ELT-12, `B0501` LSA-6, `B0502` LSH-6, `B0400` ELS-11.4, `215`
+ELS-5K). The ELT-6 / 8 / 10 are not in that table yet. A model the integration does not recognise still works: confirm the
+number of phases when adding it.
+
+If you run it on anything other than an ELT-12, an issue with the
+integration's diagnostics attached (*Download diagnostics*) is very welcome:
+it shows the model string, the serial prefix and the scale factors the device
 reports.
 
 ---
@@ -127,16 +143,29 @@ does not answer.
 Give that interface a fixed address (DHCP reservation or static IP) so the
 `host:` in the hub definition keeps working after a reboot.
 
+### Enabling Modbus
+
+Modbus is switched on from the installer tools (Modbus Protocol Rev1.1):
+
+- **EMA Manager** (app): *Third-party platform – Modbus* → on, *Communication*
+  `TCP`, *Slave address* `1`.
+- **EMA web**: *APEMS Remote Control* → *Third-party control* → *Enable Modbus*,
+  *Comm Mode* `TCP`, *Communication Address* `1`.
+
+The same screens offer RS485 (9600 baud) and, on the ELS-5K, RS232. This
+integration only uses TCP.
+
 !! When modbus enabled, the internal modes will not work any more. Charge, discharge has to be controlled with the battery set power modbus parameter.
 
 ---
 
-## Option A – Home Assistant integration (HACS)
+## Option A – Home Assistant integration (Marketplace / HACS)
 
 ### Install
 
-The buttons in [Quick start](#quick-start) open this repository in HACS and
-start the setup. Home Assistant 2026.10 or newer is required.
+The integration is in the default list of the Marketplace (*HACS* on Home
+Assistant before 2026.11). The buttons in [Quick start](#quick-start) open it
+there and start the setup. Home Assistant 2026.10 or newer is required.
 
 The integration does not open its own socket: it takes the device from Home
 Assistant's `modbus` integration, which keeps a single connection per host and
@@ -146,8 +175,11 @@ separate connection, hence step 3.
 
 Step by step:
 
-1. In HACS → *Custom repositories*, add this repository as type **Integration**.
-2. Install **APsystems Storage (ELT / ELS) Modbus** and restart Home Assistant.
+1. In the Marketplace (or HACS), search for **APsystems Storage (ELT / ELS)
+   Modbus**. If it does not show up, add
+   `https://github.com/bdecl/apsystems-storage-modbus` as a custom repository
+   of type **Integration** instead.
+2. Install it and restart Home Assistant.
 3. **Remove any `modbus:` hub pointing at the device** (Option B) and restart,
    so the single Modbus slot is free.
 4. *Settings → Devices & services → Add integration → APsystems Storage*.
@@ -165,8 +197,9 @@ Step by step:
 | Binary sensor | Battery alarm, PCS alarm (`problem`), with the active flags as attribute |
 | Number | **Power setpoint** (register 40183, W, `< 0` charge, `> 0` discharge, `0` standby), **SoC reserve min / max** |
 
-L2/L3 entities are only created for three-phase units. Single-phase units
-(ELS) get L1 and the totals.
+L2/L3 entities are only created for three-phase units (ELT-6 to ELT-12).
+Single-phase and split-phase units (ELS-5K, LSA-6, LSH-6, ELT-11K / ELS-11.4)
+get L1 and the totals.
 
 #### Entity groups
 
@@ -367,7 +400,7 @@ Scales match the values measured on a live ELT-12K. The PDF protocol states
 a scale factor of `-2` for the energy capacity (40073), but the device
 returns kWh directly. The scale-factor registers reported by the device are
 listed in the integration **diagnostics** (*Download diagnostics*): please
-attach them to any issue, especially for ELS units.
+attach them to any issue, especially for models other than the ELT-12.
 
 ---
 
